@@ -52,14 +52,19 @@ export function generateFieldsData(rng = Math.random) {
     
     baseConf = Math.max(0, Math.min(100, baseConf));
     
-    // Deterministic inference: if the fields pushed confidence >= 50, they are an alien.
-    // This allows the player to actually deduce it from the text clues!
+    // Deterministic inference: if the underlying fields pushed confidence >= 50, they are an alien.
     const isAlien = baseConf >= 50;
 
-    gameState.baseConfidence = baseConf;
+    // Add noise between -18 and +18 so the displayed percentage isn't a dead giveaway.
+    // The player MUST read the text clues to confirm the truth.
+    const noise = Math.floor(rng() * 37) - 18;
+    let displayedConf = baseConf + noise;
+    displayedConf = Math.max(0, Math.min(100, displayedConf));
+
+    gameState.baseConfidence = displayedConf;
     gameState.currentTargetIsAlien = isAlien;
     
-    return { selectedFields, baseConf, isAlien };
+    return { selectedFields, baseConf: displayedConf, isAlien };
 }
 
 export function processAction(type) {
