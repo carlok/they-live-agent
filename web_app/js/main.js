@@ -1,4 +1,4 @@
-import { loadVisionModel, detectPersons } from './vision.js';
+import { loadVisionModel, detectPersons, drawTarget } from './vision.js';
 import { generateFieldsData, processAction, gameState } from './logic.js';
 import { UI, renderHUD, showActionFeedback, updateScore, showGameOver, toggleMenu } from './ui.js';
 import { playSound, triggerVibrate } from './audio.js';
@@ -9,6 +9,7 @@ const ctx = canvas.getContext('2d');
 
 let contactCount = 0;
 let currentTarget = null; 
+let currentTargetBox = null;
 let scanCooldown = false;
 
 async function setupCamera() {
@@ -18,8 +19,14 @@ async function setupCamera() {
 }
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const container = document.getElementById('camera-container');
+    if (container) {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+    } else {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
 }
 window.addEventListener('resize', resizeCanvas);
 
@@ -27,10 +34,14 @@ async function detectFrame() {
     if (gameState.status !== 'PLAYING') return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const persons = await detectPersons(video, canvas, ctx);
+    const persons = await detectPersons(video);
     
     if (persons.length > 0 && !scanCooldown) {
         if (!currentTarget) {
+            const idx = Math.floor(Math.random() * persons.length);
+            const bestPerson = persons[idx];
+            currentTargetBox = bestPerson.bbox;
+            
             contactCount++;
             const fieldsData = generateFieldsData();
             renderHUD(fieldsData, contactCount, persons.length - 1);
@@ -38,9 +49,30 @@ async function detectFrame() {
             triggerVibrate([50, 50, 50]);
             UI.hud.classList.remove('hidden');
             currentTarget = true;
+            
+            drawTarget(bestPerson, video, canvas, ctx);
+        } else {
+            let bestPerson = null;
+            let minDistance = Infinity;
+            const [cx1, cy1] = [currentTargetBox[0] + currentTargetBox[2]/2, currentTargetBox[1] + currentTargetBox[3]/2];
+            
+            for (const p of persons) {
+                const [cx2, cy2] = [p.bbox[0] + p.bbox[2]/2, p.bbox[1] + p.bbox[3]/2];
+                const dist = Math.hypot(cx1 - cx2, cy1 - cy2);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestPerson = p;
+                }
+            }
+            
+            if (bestPerson) {
+                currentTargetBox = bestPerson.bbox;
+                drawTarget(bestPerson, video, canvas, ctx);
+            }
         }
     } else if (persons.length === 0) {
         currentTarget = null;
+        currentTargetBox = null;
         if (!UI.hud.classList.contains('hidden') && !scanCooldown) {
             UI.hud.classList.add('hidden');
         }
