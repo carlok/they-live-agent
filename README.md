@@ -20,7 +20,7 @@ This game plays with that exact bias: The "Signal" provides you with bureaucrati
 5. **Score**: You start with 100 points. Reach 200 points for promotion. Drop to 0 and you are terminated.
 
 ## Technical Details
-- **Vision Model**: The app evaluates and uses `@tensorflow-models/body-segmentation` (MediaPipe SelfieSegmentation via TF.js WebGL backend). This creates a highly performant and accurate bounding mask over the detected person without collecting biometrics.
+- **Vision Model**: The app utilizes `@tensorflow-models/coco-ssd` running via the TF.js WebGL backend. It generates a highly performant object detection lock mapped dynamically to the subject with a custom, retro-futuristic AR bracket UI.
 - **Privacy**: The AI runs 100% locally on the device browser. No images are ever sent to a server.
 - **Audio/Haptics**: Uses the Web Audio API for procedural retro synth sounds (zero external assets) and `navigator.vibrate` for tactile feedback.
 
