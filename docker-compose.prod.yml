@@ -3,9 +3,4 @@ services:
   field-agent-web:
     build: .
     ports:
-      - "443:443"
-      - "80:80"
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    environment:
-      - USE_EXTERNAL_CERT=true
+      - "8080:80"

@@ -33,11 +33,11 @@ The application is fully containerized and designed to run using `podman`.
   ```
   *(This automatically generates self-signed certificates so mobile devices can access the camera API).*
 
-- **Production Mode**: 
+- **Production Mode (Reverse Proxy)**: 
   ```bash
   podman-compose -f docker-compose.prod.yml up -d --build
   ```
-  *(Configured to use external Let's Encrypt certificates).*
+  *(Runs purely in user-space, exposing HTTP on port `8080`. You should delegate HTTPS Let's Encrypt termination to an external Nginx or Traefik reverse proxy).*
 
 - **Testing**: 
   A separate container handles Vitest unit testing with coverage reporting:
