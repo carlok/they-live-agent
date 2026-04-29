@@ -8,7 +8,7 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Copy config and web files
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.internal.conf /etc/nginx/conf.d/default.conf
 COPY web_app /usr/share/nginx/html
 
 EXPOSE 443
