@@ -28,7 +28,10 @@ function resizeCanvas() {
         canvas.height = window.innerHeight;
     }
 }
-window.addEventListener('resize', resizeCanvas);
+const resizeObserver = new ResizeObserver(() => {
+    resizeCanvas();
+});
+resizeObserver.observe(document.getElementById('camera-container'));
 
 async function detectFrame() {
     if (gameState.status !== 'PLAYING') return;
