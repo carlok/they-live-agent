@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  field-agent-web:
+    build: .
+    ports:
+      - "8443:443"
