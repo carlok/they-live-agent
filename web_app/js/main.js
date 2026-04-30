@@ -1,4 +1,4 @@
-import { loadVisionModel, detectPersons, drawTarget } from './vision.js';
+import { loadVisionModel, detectPersons, drawTarget, drawBlast } from './vision.js';
 import { generateFieldsData, processAction, gameState } from './logic.js';
 import { UI, renderHUD, showActionFeedback, updateScore, showGameOver, toggleMenu } from './ui.js';
 import { playSound, triggerVibrate } from './audio.js';
@@ -11,6 +11,7 @@ let contactCount = 0;
 let currentTarget = null; 
 let currentTargetBox = null;
 let scanCooldown = false;
+let activeBlast = null;
 
 async function setupCamera() {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -37,6 +38,17 @@ async function detectFrame() {
     if (gameState.status !== 'PLAYING') return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (activeBlast) {
+        const elapsed = Date.now() - activeBlast.startTime;
+        drawBlast(activeBlast.bbox, video, canvas, ctx, activeBlast.isPositive, elapsed, activeBlast.text);
+        if (elapsed > 1500) {
+            activeBlast = null;
+        }
+        requestAnimationFrame(detectFrame);
+        return;
+    }
+
     const persons = await detectPersons(video);
     
     if (persons.length > 0 && !scanCooldown) {
@@ -95,8 +107,26 @@ function handleAction(type) {
     
     const { message, scoreChange, newScore, status } = processAction(type);
     
-    const resultColor = scoreChange > 0 ? "var(--hud-text)" : "var(--hud-text-critical)";
-    if (scoreChange > 0) {
+    const isPositive = scoreChange > 0;
+    
+    let blastText = "";
+    if (type === 'NEUTRALIZE') {
+        blastText = isPositive ? "ALIEN NEUTRALIZED" : "FATAL MISCALCULATION";
+    } else {
+        blastText = isPositive ? "CIVILIAN RETAINED" : "THREAT ESCAPED";
+    }
+
+    if (currentTargetBox) {
+        activeBlast = { 
+            bbox: currentTargetBox, 
+            isPositive: isPositive, 
+            startTime: Date.now(),
+            text: blastText
+        };
+    }
+    
+    const resultColor = isPositive ? "var(--hud-text)" : "var(--hud-text-critical)";
+    if (isPositive) {
         playSound('good'); triggerVibrate([100, 50, 100]);
     } else {
         playSound('bad'); triggerVibrate([300]);
