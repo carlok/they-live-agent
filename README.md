@@ -45,3 +45,15 @@ The application is fully containerized and designed to run using `podman`.
   podman build -t they-live-test -f Dockerfile.test .
   podman run --rm they-live-test
   ```
+
+## 🌐 Static Deployment (Surge, GitHub Pages, Vercel)
+Because this project was engineered using pure Vanilla JS (ES Modules) and loads the TensorFlow.js models directly via CDN, **there is no build step required**. 
+
+The `web_app/` directory *is* your distribution folder! 
+
+To deploy to a service like [Surge.sh](https://surge.sh/), simply point it to the `web_app` directory:
+```bash
+npm install -g surge
+surge ./web_app your-custom-domain.surge.sh
+```
+*(Note: Static hosts must enforce HTTPS, as browsers will strictly block camera access on HTTP).*
