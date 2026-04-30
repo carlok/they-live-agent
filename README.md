@@ -54,6 +54,7 @@ The `web_app/` directory *is* your distribution folder!
 To deploy to a service like [Surge.sh](https://surge.sh/), simply point it to the `web_app` directory:
 ```bash
 npm install -g surge
-surge ./web_app your-custom-domain.surge.sh
+surge --add
+surge ./web_app raspy-agreement.surge.sh # Example domain
 ```
 *(Note: Static hosts must enforce HTTPS, as browsers will strictly block camera access on HTTP).*
