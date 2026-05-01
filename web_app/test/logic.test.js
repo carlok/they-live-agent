@@ -46,4 +46,36 @@ describe('Game Logic', () => {
         expect(res.newScore).toBe(0);
         expect(res.status).toBe('LOST');
     });
+
+    it('should penalize 10 points for skipping an alien', () => {
+        gameState.currentTargetIsAlien = true;
+        const res = processAction('SKIP');
+        expect(res.scoreChange).toBe(-10);
+        expect(res.newScore).toBe(90);
+        expect(res.status).toBe('PLAYING');
+    });
+
+    it('should award 5 points for skipping a human', () => {
+        gameState.currentTargetIsAlien = false;
+        const res = processAction('SKIP');
+        expect(res.scoreChange).toBe(5);
+        expect(res.newScore).toBe(105);
+        expect(res.status).toBe('PLAYING');
+    });
+
+    it('should win when skipping a human pushes score to 200', () => {
+        gameState.score = 195;
+        gameState.currentTargetIsAlien = false;
+        const res = processAction('SKIP');
+        expect(res.newScore).toBe(200);
+        expect(res.status).toBe('WON');
+    });
+
+    it('should lose when skipping an alien drops score to 0', () => {
+        gameState.score = 5;
+        gameState.currentTargetIsAlien = true;
+        const res = processAction('SKIP');
+        expect(res.newScore).toBe(0);
+        expect(res.status).toBe('LOST');
+    });
 });
